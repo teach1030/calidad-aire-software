@@ -1,0 +1,8 @@
+.main-view__content-container{
+    padding: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 50px;
+}

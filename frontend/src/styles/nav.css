@@ -1,0 +1,25 @@
+.nav-container{
+    position: relative;
+    margin-bottom: 30px;
+}
+.nav-components {
+    height: 60px;
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    position: absolute;
+    align-items: center;
+    background-color: #2CA087;
+    gap: 30px;
+    display: flex;
+    top: 0;
+}
+.nav-components__item{
+    color: white;
+    margin: 0px;
+    padding: 15px;
+}
+.nav-components__item:hover{
+    text-decoration: underline;
+    cursor: pointer;
+}

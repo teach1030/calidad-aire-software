@@ -1,0 +1,15 @@
+.calculator-view__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    gap: 40px;
+}
+
+.calculator-view__top-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px; /* espacio entre calculadora y resultado */
+    flex-wrap: wrap; /* para que en pantallas chicas se acomode vertical */
+}

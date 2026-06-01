@@ -1,0 +1,30 @@
+# Node.js / React
+node_modules/
+/frontend/node_modules/
+build/
+/frontend/build/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+/backend/venv/
+.env
+.venv
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# System files
+.DS_Store
+Thumbs.db

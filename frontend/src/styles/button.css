@@ -1,0 +1,22 @@
+.btn {
+    border-radius: 12px;
+    height: 45px;
+    width: 100%;
+    margin: 8px 0px 8px 0px;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.btn p {
+    width: 100%;
+    text-align: center;
+}
+
+.btn span {
+    margin-left: 6px;
+}
+
+.btn:hover {
+    cursor: pointer;
+}

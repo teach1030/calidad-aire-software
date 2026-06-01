@@ -1,0 +1,19 @@
+.login__box {
+    background-color: #F4F9F9;
+    border-radius: 12px;
+    padding: 20px 20px 50px 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 450px;
+    min-height: 520px;
+}
+
+.login__form { 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+}
+
+.login__form a {
+    font-size: 0.8rem;
+}

@@ -1,0 +1,18 @@
+.footer__block-images {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+footer{
+    background-color: #2C7DA0;
+    color: white;
+    text-align: center;
+    padding: 50px;
+    margin-top: 50px;
+}
+
+footer p {
+    font-size: 0.8rem;
+}

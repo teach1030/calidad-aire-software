@@ -1,0 +1,19 @@
+.inp{
+    display: flex;
+    flex-direction: column;
+}
+
+.inp__input {
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px; 
+    font-size: 1rem;
+    outline: none;
+    background-color: #fff;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.inp__label {
+    padding: 6px;
+    font-size: 0.8rem;
+}
