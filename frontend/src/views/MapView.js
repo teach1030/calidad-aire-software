@@ -145,6 +145,7 @@ const MapView = () => {
     const handlePredict = async () => {
         if (!selectedData) return;
         setLoading(true);
+        const token = localStorage.getItem('token');
         try {
             const response = await fetch('http://localhost:8000/predict_map', {
                 method: 'POST',
@@ -162,7 +163,8 @@ const MapView = () => {
                     temperatura: selectedData.temp || 15.0,
                     humedad: selectedData.hr || 60.0,
                     velocidad_viento: selectedData.wspd || 13.0,
-                    co2: selectedData.wdir || 192.0
+                    co2: selectedData.wdir || 192.0,
+                    user_token: token
                 }),
             });
             const data = await response.json();

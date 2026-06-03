@@ -1,8 +1,10 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Nav = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const isAuthenticated = !!localStorage.getItem('token');
     
     const links = [
         { name: 'Inicio', path: '/' },
@@ -10,6 +12,12 @@ const Nav = () => {
         { name: 'Calculadora', path: '/calculator' },
         { name: 'Nosotros', path: '/us' }
     ];
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userEmail');
+        navigate('/login');
+    };
 
     return (
         <nav className="bg-[#0b1a13]/80 backdrop-blur-md border-b border-[#1e3a2e] sticky top-0 z-50">
@@ -34,12 +42,21 @@ const Nav = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link 
-                        to="/login" 
-                        className="px-5 py-2 rounded-full border border-[#90BE6D] text-[#90BE6D] text-sm font-semibold hover:bg-[#90BE6D] hover:text-[#0b1a13] transition-all"
-                    >
-                        Ingresar
-                    </Link>
+                    {isAuthenticated ? (
+                        <button 
+                            onClick={handleLogout}
+                            className="px-5 py-2 rounded-full border border-red-500 text-red-500 text-sm font-semibold hover:bg-red-500 hover:text-white transition-all"
+                        >
+                            Cerrar Sesión
+                        </button>
+                    ) : (
+                        <Link 
+                            to="/login" 
+                            className="px-5 py-2 rounded-full border border-[#90BE6D] text-[#90BE6D] text-sm font-semibold hover:bg-[#90BE6D] hover:text-[#0b1a13] transition-all"
+                        >
+                            Ingresar
+                        </Link>
+                    )}
                 </div>
             </div>
         </nav>

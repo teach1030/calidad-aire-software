@@ -1,15 +1,22 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 import tensorflow as tf
 import numpy as np
 import joblib
 import os
+import requests
 from datetime import datetime
+from firebase_config import initialize_firebase
+from firebase_admin import auth, firestore
 
 app = FastAPI(title="API de Calidad del Aire - Modelo GRU")
 
-# Habilitar CORS para permitir peticiones desde el frontend
+# Inicializar Firebase
+firebase_app = initialize_firebase()
+db = firestore.client() if firebase_app else None
+
+# Habilitar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,7 +25,74 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Rutas de los archivos
+# Configuración Firebase REST API (para Login)
+FIREBASE_WEB_API_KEY = os.getenv("FIREBASE_WEB_API_KEY")
+
+# --- Modelos de Autenticación ---
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str
+    display_name: str = None
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+# --- Rutas de Autenticación ---
+
+@app.post("/auth/register")
+async def register(user: UserRegister):
+    try:
+        user_record = auth.create_user(
+            email=user.email,
+            password=user.password,
+            display_name=user.display_name
+        )
+        return {"message": "Usuario creado exitosamente", "uid": user_record.uid}
+    except Exception as e:
+        print(f"DEBUG - Error en registro: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/auth/login")
+async def login(user: UserLogin):
+    # El Admin SDK no tiene método de login directo con contraseña.
+    # Se usa la REST API de Firebase Identity Platform.
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}"
+    payload = {
+        "email": user.email,
+        "password": user.password,
+        "returnSecureToken": True
+    }
+    response = requests.post(url, json=payload)
+    data = response.json()
+
+    if response.status_code != 200:
+        error_msg = data.get("error", {}).get("message", "Error en el inicio de sesión")
+        raise HTTPException(status_code=401, detail=error_msg)
+
+    return {
+        "idToken": data["idToken"],
+        "email": data["email"],
+        "localId": data["localId"],
+        "expiresIn": data["expiresIn"]
+    }
+
+@app.post("/auth/reset-password")
+async def reset_password(data: PasswordReset):
+    try:
+        # Genera un link de recuperación de contraseña
+        link = auth.generate_password_reset_link(data.email)
+        # Aquí podrías enviar un correo manualmente si tuvieras un servicio de mail.
+        # Por ahora, devolvemos el link (en producción Firebase lo envía automáticamente 
+        # si usas su SDK de cliente, pero desde Admin lo generas tú).
+        return {"message": "Enlace de recuperación generado", "link": link}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Rutas de los archivos originales
 BASE_DIR = os.path.dirname(__file__)
 MODEL_PATH = os.path.join(BASE_DIR, "modelo_gru_sensorama.h5")
 SCALER_PATH = os.path.join(BASE_DIR, "escalador_datos.pkl")
@@ -48,6 +122,7 @@ class PredictionInput(BaseModel):
     humedad: float
     velocidad_viento: float
     co2: float
+    user_token: str = None  # Token opcional para guardar historial
 
 class MapPredictionInput(BaseModel):
     localidad: str
@@ -63,6 +138,7 @@ class MapPredictionInput(BaseModel):
     humedad: float
     velocidad_viento: float
     co2: float
+    user_token: str = None  # Token opcional para guardar historial
 
 @app.post("/predict")
 async def predict(data: PredictionInput):
@@ -108,6 +184,23 @@ async def predict(data: PredictionInput):
         elif result <= 200: calidad = "Dañina a la salud"
         elif result <= 300: calidad = "Muy dañina a la salud"
         else: calidad = "Peligrosa"
+
+        # 7. Guardar en Firestore si el usuario está autenticado
+        if db and data.user_token:
+            try:
+                decoded_token = auth.verify_id_token(data.user_token)
+                uid = decoded_token['uid']
+                db.collection('predictions').add({
+                    'uid': uid,
+                    'email': decoded_token.get('email'),
+                    'type': 'calculator',
+                    'input_data': data.dict(exclude={'user_token'}),
+                    'prediction': round(result, 2),
+                    'calidad': calidad,
+                    'timestamp': firestore.SERVER_TIMESTAMP
+                })
+            except Exception as e:
+                print(f"Error al guardar historial: {e}")
 
         return {
             "prediction": round(result, 2),
@@ -161,6 +254,24 @@ async def predict_map(data: MapPredictionInput):
         elif result <= 200: calidad = "Dañina a la salud"
         elif result <= 300: calidad = "Muy dañina a la salud"
         else: calidad = "Peligrosa"
+
+        # 7. Guardar en Firestore si el usuario está autenticado
+        if db and data.user_token:
+            try:
+                decoded_token = auth.verify_id_token(data.user_token)
+                uid = decoded_token['uid']
+                db.collection('predictions').add({
+                    'uid': uid,
+                    'email': decoded_token.get('email'),
+                    'type': 'map',
+                    'localidad': data.localidad,
+                    'input_data': data.dict(exclude={'user_token'}),
+                    'prediction': round(result, 2),
+                    'calidad': calidad,
+                    'timestamp': firestore.SERVER_TIMESTAMP
+                })
+            except Exception as e:
+                print(f"Error al guardar historial de mapa: {e}")
 
         return {
             "prediction": round(result, 2),

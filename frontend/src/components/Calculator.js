@@ -20,6 +20,8 @@ const Calculator = ({ setTotal, setCalidad }) => {
         setLoading(true);
         setError(null);
 
+        const token = localStorage.getItem('token');
+
         try {
             const response = await fetch('http://localhost:8000/predict', {
                 method: 'POST',
@@ -34,7 +36,8 @@ const Calculator = ({ setTotal, setCalidad }) => {
                     temperatura: parseFloat(temperatura) || 0,
                     humedad: parseFloat(humedad) || 0,
                     velocidad_viento: parseFloat(velocidadViento) || 0,
-                    co2: parseFloat(co2) || 0
+                    co2: parseFloat(co2) || 0,
+                    user_token: token
                 }),
             });
 
