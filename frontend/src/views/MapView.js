@@ -499,5 +499,3 @@ const MapView = () => {
 };
 
 export { MapView };
-
-export { MapView };
