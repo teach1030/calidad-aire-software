@@ -1,4 +1,5 @@
 import React from 'react';
+import juanImg from '../assets/juan.jpeg';
 
 const Us = () => {
   const technologies = [
@@ -27,8 +28,8 @@ const Us = () => {
 
         <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
           <div className="relative">
-            <div className="w-40 h-40 lg:w-48 lg:h-48 rounded-[2rem] bg-[#1c2e26] border border-[#2d4a3d] flex items-center justify-center text-5xl shadow-inner">
-              👨‍💻
+            <div className="w-40 h-40 lg:w-48 lg:h-48 rounded-[2rem] bg-[#1c2e26] border border-[#2d4a3d] overflow-hidden shadow-inner">
+              <img src={juanImg} alt="Juan Esteban Guerrero Vera" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-[#90BE6D] rounded-2xl flex items-center justify-center text-white shadow-lg border-4 border-[#0b1a13]">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
