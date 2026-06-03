@@ -147,7 +147,7 @@ const MapView = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('http://localhost:8000/predict_map', {
+            const response = await fetch('https://calidad-aire-software.onrender.com/predict_map', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
