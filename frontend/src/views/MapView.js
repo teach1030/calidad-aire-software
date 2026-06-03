@@ -40,8 +40,10 @@ const MapView = () => {
     const [mapCenter, setMapCenter] = useState([4.65, -74.095]);
     const [mapZoom, setMapZoom] = useState(12);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isControlsOpen, setIsControlsOpen] = useState(true);
 
     const stationOptions = Object.keys(STATIONS);
+    const isMobile = window.innerWidth < 768;
 
     const getRecommendations = (val) => {
         if (!val) return null;
@@ -120,9 +122,10 @@ const MapView = () => {
                 setMapCenter(station.coords);
                 setMapZoom(14);
                 setIsSidebarOpen(true);
+                if (isMobile) setIsControlsOpen(false);
             }
         }
-    }, [location.state, currentHour]);
+    }, [location.state, currentHour, isMobile]);
 
     const handleSearch = () => {
         if (!localidad) {
@@ -143,12 +146,14 @@ const MapView = () => {
             setMapCenter(station.coords);
             setMapZoom(14);
             setIsSidebarOpen(true);
+            if (isMobile) setIsControlsOpen(false);
         }
     };
 
     const handlePredict = async () => {
         if (!selectedData) return;
         setLoading(true);
+        if (isMobile) setIsControlsOpen(false);
         const token = localStorage.getItem('token');
         try {
             const response = await fetch('https://calidad-aire-software.onrender.com/predict_map', {
@@ -208,47 +213,60 @@ const MapView = () => {
             <Nav />
             
             {/* Responsive Control Bar */}
-            <div className="bg-[#0b1a13] border-b border-[#1e3a2e] p-3 md:p-4 flex flex-col md:flex-row items-stretch md:items-end gap-3 md:gap-4 shadow-lg z-[1001]">
-                <div className="grid grid-cols-2 md:flex md:flex-row gap-3 flex-1">
-                    <div className="flex flex-col gap-1 col-span-2 md:col-span-1">
-                        <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Estación</label>
-                        <select 
-                            value={localidad} 
-                            onChange={(e)=>setLocalidad(e.target.value)}
-                            className={inputClass}
+            <div className={`bg-[#0b1a13] border-b border-[#1e3a2e] transition-all duration-300 overflow-hidden z-[1001] shadow-lg ${isControlsOpen ? 'max-h-[500px] opacity-100 p-3 md:p-4' : 'max-h-0 opacity-0 p-0 border-none'}`}>
+                <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3 md:gap-4">
+                    <div className="grid grid-cols-2 md:flex md:flex-row gap-3 flex-1">
+                        <div className="flex flex-col gap-1 col-span-2 md:col-span-1">
+                            <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Estación</label>
+                            <select 
+                                value={localidad} 
+                                onChange={(e)=>setLocalidad(e.target.value)}
+                                className={inputClass}
+                            >
+                                <option value="">Selecciona...</option>
+                                {stationOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Fecha</label>
+                            <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} className={inputClass} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Hora</label>
+                            <input type="time" value={hora} onChange={(e)=>setHora(e.target.value)} className={inputClass} />
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={handleSearch}
+                            className="flex-1 md:flex-none bg-[#1e6b4a] hover:bg-[#2d9264] text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2"
                         >
-                            <option value="">Selecciona...</option>
-                            {stationOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                            <HiSearch className="md:hidden" size={16} />
+                            <span className="hidden md:inline">Consultar Historial</span>
+                            <span className="md:hidden">Consultar</span>
+                        </button>
+                        <button 
+                            onClick={handlePredict}
+                            className="flex-1 md:flex-none border border-[#90BE6D] text-[#90BE6D] hover:bg-[#90BE6D] hover:text-[#0b1a13] px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2"
+                        >
+                            <HiLightningBolt className="md:hidden" size={16} />
+                            <span className="hidden md:inline">Predecir GRU</span>
+                            <span className="md:hidden">Predecir</span>
+                        </button>
                     </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Fecha</label>
-                        <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} className={inputClass} />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Hora</label>
-                        <input type="time" value={hora} onChange={(e)=>setHora(e.target.value)} className={inputClass} />
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                    <button 
-                        onClick={handleSearch}
-                        className="flex-1 md:flex-none bg-[#1e6b4a] hover:bg-[#2d9264] text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2"
-                    >
-                        <HiSearch className="md:hidden" size={16} />
-                        <span className="hidden md:inline">Consultar Historial</span>
-                        <span className="md:hidden">Consultar</span>
-                    </button>
-                    <button 
-                        onClick={handlePredict}
-                        className="flex-1 md:flex-none border border-[#90BE6D] text-[#90BE6D] hover:bg-[#90BE6D] hover:text-[#0b1a13] px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2"
-                    >
-                        <HiLightningBolt className="md:hidden" size={16} />
-                        <span className="hidden md:inline">Predecir GRU</span>
-                        <span className="md:hidden">Predecir</span>
-                    </button>
                 </div>
             </div>
+
+            {/* Control Bar Toggle Button */}
+            <button 
+                onClick={() => setIsControlsOpen(!isControlsOpen)}
+                className="absolute left-1/2 -translate-x-1/2 top-[64px] z-[1002] bg-[#0b1a13] border border-t-0 border-[#1e3a2e] text-[#90BE6D] px-4 py-1 rounded-b-xl shadow-md transition-all hover:bg-[#1c2e26]"
+            >
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                    <span>{isControlsOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}</span>
+                    <HiChevronRight className={`transition-transform duration-300 ${isControlsOpen ? '-rotate-90' : 'rotate-90'}`} />
+                </div>
+            </button>
 
             <div className="flex-1 flex overflow-hidden relative">
                 {/* Map Section */}
