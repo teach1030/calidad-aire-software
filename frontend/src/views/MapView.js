@@ -349,12 +349,12 @@ const MapView = () => {
 
                 {/* Sidebar Panel */}
                 <aside className={`
-                    fixed md:relative inset-y-0 right-0 w-[85%] md:w-[380px] bg-[#0b1a13] border-l border-[#1e3a2e] p-4 md:p-6 overflow-y-auto shadow-2xl z-[1000] custom-scrollbar
+                    fixed md:relative top-16 md:top-0 bottom-0 right-0 w-[85%] md:w-[380px] bg-[#0b1a13] border-l border-[#1e3a2e] p-4 md:p-6 overflow-y-auto shadow-2xl z-[1000] custom-scrollbar
                     transition-transform duration-300 ease-in-out
                     ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full md:hidden'}
                 `}>
                     {selectedData ? (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 pb-20 md:pb-0">
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 pb-20 md:pb-0 pt-10 md:pt-0">
                             {/* Header Section */}
                             <div className="bg-[#1c2e26] rounded-2xl p-4 md:p-5 border border-[#2d4a3d] shadow-inner">
                                 <div className="flex justify-between items-start mb-4">
