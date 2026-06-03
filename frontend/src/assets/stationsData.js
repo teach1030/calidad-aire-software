@@ -9,7 +9,6 @@ const getChemicalProfile = (stationName, hour, pm10) => {
     // Determine station type
     const isIndustrial = stationName.includes("KENNEDY") || stationName.includes("CARVAJAL") || stationName.includes("FONTIBON") || stationName.includes("PUENTE ARANDA");
     const isResidential = stationName.includes("USAQUEN") || stationName.includes("GUAYMARAL") || stationName.includes("SAN CRISTOBAL");
-    const isTraffic = stationName.includes("FERIAS") || stationName.includes("CENTRO") || stationName.includes("MOVIL");
 
     const h = parseInt(hour);
     const isRushHour = (h >= 6 && h <= 9) || (h >= 17 && h <= 20);
