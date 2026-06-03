@@ -4,6 +4,7 @@ import { STATIONS } from '../assets/stationsData';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { useLocation } from 'react-router-dom';
+import { HiChevronRight, HiChevronLeft, HiSearch, HiLightningBolt } from 'react-icons/hi';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -38,6 +39,7 @@ const MapView = () => {
     const [loading, setLoading] = useState(false);
     const [mapCenter, setMapCenter] = useState([4.65, -74.095]);
     const [mapZoom, setMapZoom] = useState(12);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const stationOptions = Object.keys(STATIONS);
 
@@ -117,6 +119,7 @@ const MapView = () => {
                 });
                 setMapCenter(station.coords);
                 setMapZoom(14);
+                setIsSidebarOpen(true);
             }
         }
     }, [location.state, currentHour]);
@@ -139,6 +142,7 @@ const MapView = () => {
             setPrediction(null);
             setMapCenter(station.coords);
             setMapZoom(14);
+            setIsSidebarOpen(true);
         }
     };
 
@@ -197,47 +201,57 @@ const MapView = () => {
         });
     };
 
-    const inputClass = "bg-[#1c2e26] border border-[#2d4a3d] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#90BE6D] transition-all text-sm";
+    const inputClass = "bg-[#1c2e26] border border-[#2d4a3d] rounded-lg p-2 text-white focus:outline-none focus:border-[#90BE6D] transition-all text-xs w-full";
 
     return (
         <div className="flex flex-col h-screen bg-[#050c09] overflow-hidden">
             <Nav />
             
-            <div className="bg-[#0b1a13] border-b border-[#1e3a2e] p-4 flex flex-wrap items-end gap-4 shadow-lg z-[1001]">
-                <div className="flex flex-col gap-1">
-                    <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Estación</label>
-                    <select 
-                        value={localidad} 
-                        onChange={(e)=>setLocalidad(e.target.value)}
-                        className={inputClass}
+            {/* Responsive Control Bar */}
+            <div className="bg-[#0b1a13] border-b border-[#1e3a2e] p-3 md:p-4 flex flex-col md:flex-row items-stretch md:items-end gap-3 md:gap-4 shadow-lg z-[1001]">
+                <div className="grid grid-cols-2 md:flex md:flex-row gap-3 flex-1">
+                    <div className="flex flex-col gap-1 col-span-2 md:col-span-1">
+                        <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Estación</label>
+                        <select 
+                            value={localidad} 
+                            onChange={(e)=>setLocalidad(e.target.value)}
+                            className={inputClass}
+                        >
+                            <option value="">Selecciona...</option>
+                            {stationOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Fecha</label>
+                        <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} className={inputClass} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Hora</label>
+                        <input type="time" value={hora} onChange={(e)=>setHora(e.target.value)} className={inputClass} />
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <button 
+                        onClick={handleSearch}
+                        className="flex-1 md:flex-none bg-[#1e6b4a] hover:bg-[#2d9264] text-white px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2"
                     >
-                        <option value="">Selecciona...</option>
-                        {stationOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                        <HiSearch className="md:hidden" size={16} />
+                        <span className="hidden md:inline">Consultar Historial</span>
+                        <span className="md:hidden">Consultar</span>
+                    </button>
+                    <button 
+                        onClick={handlePredict}
+                        className="flex-1 md:flex-none border border-[#90BE6D] text-[#90BE6D] hover:bg-[#90BE6D] hover:text-[#0b1a13] px-4 py-2 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2"
+                    >
+                        <HiLightningBolt className="md:hidden" size={16} />
+                        <span className="hidden md:inline">Predecir GRU</span>
+                        <span className="md:hidden">Predecir</span>
+                    </button>
                 </div>
-                <div className="flex flex-col gap-1">
-                    <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Fecha</label>
-                    <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} className={inputClass} />
-                </div>
-                <div className="flex flex-col gap-1">
-                    <label className="text-[10px] uppercase font-bold text-[#90BE6D]">Hora</label>
-                    <input type="time" value={hora} onChange={(e)=>setHora(e.target.value)} className={inputClass} />
-                </div>
-                <button 
-                    onClick={handleSearch}
-                    className="bg-[#1e6b4a] hover:bg-[#2d9264] text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all"
-                >
-                    Consultar Historial
-                </button>
-                <button 
-                    onClick={handlePredict}
-                    className="border border-[#90BE6D] text-[#90BE6D] hover:bg-[#90BE6D] hover:text-[#0b1a13] px-6 py-2.5 rounded-lg font-bold text-sm transition-all"
-                >
-                    Predecir GRU
-                </button>
             </div>
 
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden relative">
+                {/* Map Section */}
                 <div className="flex-1 relative z-0">
                     <MapContainer 
                         center={mapCenter} 
@@ -252,7 +266,6 @@ const MapView = () => {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                         />
                         {Object.entries(STATIONS).map(([name, data]) => {
-                            // MARKERS ALWAYS REFLECT CURRENT ACTUAL HOUR
                             const hourData = getClosestHourData(data, currentHour);
                             return (
                                 <Marker 
@@ -262,7 +275,6 @@ const MapView = () => {
                                     eventHandlers={{
                                         click: () => {
                                             setLocalidad(name);
-                                            // Panel reflects data from the SEARCH FORM's hour
                                             const searchHour = parseInt(hora.split(':')[0]);
                                             const searchData = getClosestHourData(data, searchHour);
                                             setSelectedData({
@@ -272,6 +284,7 @@ const MapView = () => {
                                             });
                                             setMapCenter(data.coords);
                                             setMapZoom(14);
+                                            setIsSidebarOpen(true);
                                         },
                                     }}
                                 >
@@ -284,8 +297,8 @@ const MapView = () => {
                         })}
                     </MapContainer>
                     
-                    {/* Map Legend Overlay */}
-                    <div className="absolute bottom-6 left-6 bg-[#0b1a13]/80 backdrop-blur-md border border-[#1e3a2e] p-3 rounded-xl z-[1000] shadow-2xl">
+                    {/* Map Legend Overlay - Hidden on small mobile */}
+                    <div className="hidden sm:block absolute bottom-6 left-6 bg-[#0b1a13]/80 backdrop-blur-md border border-[#1e3a2e] p-3 rounded-xl z-[1000] shadow-2xl">
                         <div className="text-[10px] uppercase font-black text-[#90BE6D] mb-2 tracking-widest">PM10 (µg/m³)</div>
                         <div className="space-y-1.5">
                             <div className="flex items-center gap-2">
@@ -308,30 +321,43 @@ const MapView = () => {
                     </div>
                 </div>
 
-                <aside className="w-[380px] bg-[#0b1a13] border-l border-[#1e3a2e] p-6 overflow-y-auto shadow-2xl z-10 custom-scrollbar">
+                {/* Toggle Sidebar Button (Mobile/Desktop) */}
+                <button 
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 z-[1001] bg-[#1e6b4a] text-white p-1 rounded-l-md shadow-lg transition-all duration-300 ${isSidebarOpen ? 'md:mr-[380px] mr-[85%]' : 'mr-0'}`}
+                >
+                    {isSidebarOpen ? <HiChevronRight size={24} /> : <HiChevronLeft size={24} />}
+                </button>
+
+                {/* Sidebar Panel */}
+                <aside className={`
+                    fixed md:relative inset-y-0 right-0 w-[85%] md:w-[380px] bg-[#0b1a13] border-l border-[#1e3a2e] p-4 md:p-6 overflow-y-auto shadow-2xl z-[1000] custom-scrollbar
+                    transition-transform duration-300 ease-in-out
+                    ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full md:hidden'}
+                `}>
                     {selectedData ? (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 pb-20 md:pb-0">
                             {/* Header Section */}
-                            <div className="bg-[#1c2e26] rounded-2xl p-5 border border-[#2d4a3d] shadow-inner">
+                            <div className="bg-[#1c2e26] rounded-2xl p-4 md:p-5 border border-[#2d4a3d] shadow-inner">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h4 className="text-white font-bold text-xl leading-tight">{selectedData.name}</h4>
-                                        <p className="text-[#90BE6D] text-xs font-medium opacity-80">
+                                    <div className="flex-1 pr-2">
+                                        <h4 className="text-white font-bold text-lg md:text-xl leading-tight truncate">{selectedData.name}</h4>
+                                        <p className="text-[#90BE6D] text-[10px] md:text-xs font-medium opacity-80">
                                             {selectedData.locality} · {fecha} ({selectedData.displayHour}:00h)
                                         </p>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getICAInfo(selectedData.pm10).cls}`}>
+                                    <div className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider flex-shrink-0 ${getICAInfo(selectedData.pm10).cls}`}>
                                         {getICAInfo(selectedData.pm10).cat}
                                     </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-6 mt-2">
-                                    <div className="text-5xl font-black text-white tracking-tighter">
+                                <div className="flex items-center gap-4 md:gap-6 mt-2">
+                                    <div className="text-4xl md:text-5xl font-black text-white tracking-tighter">
                                         {getICAInfo(selectedData.pm10).ica || '—'}
                                     </div>
                                     <div className="flex-1 space-y-3">
                                         <div>
-                                            <div className="flex justify-between text-[9px] uppercase font-bold text-gray-500 mb-1">
+                                            <div className="flex justify-between text-[8px] md:text-[9px] uppercase font-bold text-gray-500 mb-1">
                                                 <span>PM2.5</span>
                                                 <span className="text-gray-300">{selectedData.pm25 ? Math.round(selectedData.pm25) : '—'} µg/m³</span>
                                             </div>
@@ -343,7 +369,7 @@ const MapView = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <div className="flex justify-between text-[9px] uppercase font-bold text-gray-500 mb-1">
+                                            <div className="flex justify-between text-[8px] md:text-[9px] uppercase font-bold text-gray-500 mb-1">
                                                 <span>PM10</span>
                                                 <span className="text-gray-300">{selectedData.pm10 ? Math.round(selectedData.pm10) : '—'} µg/m³</span>
                                             </div>
@@ -362,12 +388,12 @@ const MapView = () => {
                             <div className="bg-[#050c09] p-4 rounded-2xl border border-[#1e3a2e]">
                                 <div className="text-[10px] uppercase font-bold text-[#90BE6D] mb-4 flex justify-between items-center">
                                     <span>Tendencia Histórica</span>
-                                    <div className="flex gap-3">
-                                        <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#90BE6D]"></div><span className="text-[8px] text-gray-500">PM10</span></div>
-                                        <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#f59e0b]"></div><span className="text-[8px] text-gray-500">PM2.5</span></div>
+                                    <div className="flex gap-2 md:gap-3">
+                                        <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#90BE6D]"></div><span className="text-[8px] text-gray-500">PM10</span></div>
+                                        <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></div><span className="text-[8px] text-gray-500">PM2.5</span></div>
                                     </div>
                                 </div>
-                                <div className="h-[160px] w-full">
+                                <div className="h-[140px] md:h-[160px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={
                                             Object.entries(STATIONS[selectedData.name].hourly)
@@ -381,10 +407,10 @@ const MapView = () => {
                                                 </linearGradient>
                                             </defs>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#1e3a2e" vertical={false} />
-                                            <XAxis dataKey="hour" stroke="#4b5563" fontSize={9} tickLine={false} axisLine={false} />
+                                            <XAxis dataKey="hour" stroke="#4b5563" fontSize={8} tickLine={false} axisLine={false} />
                                             <YAxis hide />
                                             <RechartsTooltip 
-                                                contentStyle={{ backgroundColor: '#0b1a13', border: '1px solid #1e3a2e', borderRadius: '8px', fontSize: '11px' }}
+                                                contentStyle={{ backgroundColor: '#0b1a13', border: '1px solid #1e3a2e', borderRadius: '8px', fontSize: '10px' }}
                                                 itemStyle={{ padding: '0px' }}
                                             />
                                             <Area type="monotone" dataKey="pm10" stroke="#90BE6D" strokeWidth={2} fillOpacity={1} fill="url(#colorPm10)" />
@@ -402,18 +428,18 @@ const MapView = () => {
                                         const nextH = (selectedData.displayHour + i) % 24 || 24;
                                         const hData = STATIONS[selectedData.name].hourly[nextH] || STATIONS[selectedData.name].hourly["8"] || Object.values(STATIONS[selectedData.name].hourly)[0];
                                         return (
-                                            <div key={i} className="bg-[#050c09] p-2 rounded-lg border border-[#1e3a2e] text-center">
-                                                <div className="text-[8px] text-gray-500 mb-1">{nextH}h</div>
-                                                <div className="h-8 w-full flex items-end justify-center mb-1">
+                                            <div key={i} className="bg-[#050c09] p-1.5 md:p-2 rounded-lg border border-[#1e3a2e] text-center">
+                                                <div className="text-[7px] md:text-[8px] text-gray-500 mb-1">{nextH}h</div>
+                                                <div className="h-6 md:h-8 w-full flex items-end justify-center mb-1">
                                                     <div 
-                                                        className="w-1.5 rounded-t-sm transition-all duration-1000" 
+                                                        className="w-1 md:w-1.5 rounded-t-sm transition-all duration-1000" 
                                                         style={{ 
                                                             height: `${Math.max(10, Math.min(100, (hData.pm10 / 60) * 100))}%`,
                                                             background: getICAColor(hData.pm10)
                                                         }}
                                                     ></div>
                                                 </div>
-                                                <div className="text-[9px] font-bold text-white">{Math.round(hData.pm10)}</div>
+                                                <div className="text-[8px] md:text-[9px] font-bold text-white">{Math.round(hData.pm10)}</div>
                                             </div>
                                         );
                                     })}
@@ -421,44 +447,37 @@ const MapView = () => {
                             </div>
 
                             {loading && (
-                                <div className="flex flex-col items-center py-6 gap-3">
-                                    <div className="w-8 h-8 border-2 border-[#90BE6D] border-t-transparent rounded-full animate-spin"></div>
-                                    <div className="text-[#90BE6D] animate-pulse font-bold text-[10px] uppercase tracking-widest">Ejecutando Modelo GRU...</div>
+                                <div className="flex flex-col items-center py-4 gap-2">
+                                    <div className="w-6 h-6 border-2 border-[#90BE6D] border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-[#90BE6D] animate-pulse font-bold text-[9px] uppercase tracking-widest">Ejecutando Modelo GRU...</div>
                                 </div>
                             )}
 
                             {prediction && (
                                 <div className="space-y-4 animate-in fade-in zoom-in duration-500">
-                                    <div className="bg-gradient-to-br from-[#1e6b4a] to-[#0b1a13] p-5 rounded-2xl border border-[#90BE6D]/30 shadow-xl relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-2 opacity-10">
-                                            <div className="w-16 h-16 rounded-full border-4 border-white"></div>
-                                        </div>
-                                        <h5 className="text-[10px] uppercase font-black text-[#90BE6D] mb-3 flex items-center gap-2">
-                                            <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                                    <div className="bg-gradient-to-br from-[#1e6b4a] to-[#0b1a13] p-4 md:p-5 rounded-2xl border border-[#90BE6D]/30 shadow-xl relative overflow-hidden">
+                                        <h5 className="text-[9px] md:text-[10px] uppercase font-black text-[#90BE6D] mb-3 flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
                                             Predicción AI (PM10)
                                         </h5>
-                                        <div className="text-4xl font-black text-white mb-1 tracking-tighter">{prediction.prediction} <span className="text-sm font-normal opacity-60">µg/m³</span></div>
-                                        <p className="text-xs font-medium text-green-100 opacity-80">{prediction.calidad}</p>
+                                        <div className="text-3xl md:text-4xl font-black text-white mb-1 tracking-tighter">{prediction.prediction} <span className="text-xs md:text-sm font-normal opacity-60">µg/m³</span></div>
+                                        <p className="text-[10px] md:text-xs font-medium text-green-100 opacity-80">{prediction.calidad}</p>
                                     </div>
 
                                     {/* Detailed Recommendations */}
-                                    <div className="bg-[#1c2e26] p-5 rounded-2xl border border-[#2d4a3d] shadow-lg">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-10 h-10 bg-[#050c09] rounded-xl flex items-center justify-center text-xl border border-[#2d4a3d]">
+                                    <div className="bg-[#1c2e26] p-4 md:p-5 rounded-2xl border border-[#2d4a3d] shadow-lg">
+                                        <div className="flex items-start gap-3 md:gap-4">
+                                            <div className="w-8 h-8 md:w-10 md:h-10 bg-[#050c09] rounded-xl flex items-center justify-center text-lg md:text-xl border border-[#2d4a3d] flex-shrink-0">
                                                 {getRecommendations(prediction.prediction)?.icon}
                                             </div>
                                             <div>
-                                                <h6 className={`font-bold text-sm ${getRecommendations(prediction.prediction)?.color}`}>
+                                                <h6 className={`font-bold text-xs md:text-sm ${getRecommendations(prediction.prediction)?.color}`}>
                                                     {getRecommendations(prediction.prediction)?.title}
                                                 </h6>
-                                                <p className="text-[11px] text-gray-400 mt-1.5 leading-relaxed italic">
+                                                <p className="text-[10px] md:text-[11px] text-gray-400 mt-1 leading-relaxed italic">
                                                     "{getRecommendations(prediction.prediction)?.text}"
                                                 </p>
                                             </div>
-                                        </div>
-                                        <div className="mt-4 pt-4 border-t border-[#2d4a3d] grid grid-cols-2 gap-3">
-                                            <div className="text-[9px] text-gray-500 font-bold uppercase">Fuente: Modelo Predictivo</div>
-                                            <div className="text-[9px] text-gray-300 font-bold uppercase text-right">Confianza: 89%</div>
                                         </div>
                                     </div>
                                 </div>
@@ -466,11 +485,11 @@ const MapView = () => {
                         </div>
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                            <div className="w-16 h-16 bg-[#1c2e26] rounded-full flex items-center justify-center mb-4 text-[#90BE6D]">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <div className="w-12 h-12 md:w-16 md:h-16 bg-[#1c2e26] rounded-full flex items-center justify-center mb-4 text-[#90BE6D]">
+                                <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </div>
-                            <h4 className="text-white font-bold mb-2">Sin selección</h4>
-                            <p className="text-gray-500 text-xs leading-relaxed">Haz clic en una estación del mapa o selecciónala arriba para visualizar datos históricos y generar predicciones inteligentes.</p>
+                            <h4 className="text-white font-bold mb-2 text-sm md:text-base">Sin selección</h4>
+                            <p className="text-gray-500 text-[10px] md:text-xs leading-relaxed">Haz clic en una estación del mapa o selecciónala arriba para visualizar datos históricos y generar predicciones inteligentes.</p>
                         </div>
                     )}
                 </aside>
@@ -478,5 +497,7 @@ const MapView = () => {
         </div>
     );
 };
+
+export { MapView };
 
 export { MapView };
